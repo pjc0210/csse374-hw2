@@ -1,14 +1,21 @@
 @startuml
 
 class main{
-
++main(args: String[]):void
 }
+
 package PresentationLayer{
   class Splendor{
     frame: JFrame
     gameBoy: GameBoy
+    g: Graphics
+
+    +loadGame(): void
+    +playGame(): void
+
   }
 }
+
 package DomainLayer{
   class GameBoy{
     cards: List<Card>
@@ -20,7 +27,6 @@ package DomainLayer{
     +loadGame(): void
     +makeMove(movIndex: int, move: String): boolean
     -gameOver(): boolean
-
   }
 
   class Card{
@@ -32,6 +38,7 @@ package DomainLayer{
   class Player{
     totalVP: int
     chips: Map<Character, Integer>
+    name: String
     drawChip(color: String): boolean
     buyCard(card: Card): boolean
     toString(): String

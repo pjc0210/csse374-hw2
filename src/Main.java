@@ -1,15 +1,29 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+import Presentation.Splendor;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+/**
+ * Main entry point for the Splendor game application.
+ */
+public class main {
+
+    public static void main(String[] args) {
+        // Set look and feel to system default for better appearance
+        try {
+            javax.swing.UIManager.setLookAndFeel(
+                    javax.swing.UIManager.getSystemLookAndFeelClassName()
+            );
+        } catch (Exception e) {
+            System.err.println("Could not set look and feel: " + e.getMessage());
         }
+
+        // Create and display the game on the Event Dispatch Thread
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Starting Splendor game...");
+                Splendor game = new Splendor();
+                game.playGame();
+                System.out.println("Game initialized successfully!");
+            }
+        });
     }
 }

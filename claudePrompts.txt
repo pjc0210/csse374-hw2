@@ -1,0 +1,71 @@
+1: Generating initial code from UML
+@startuml
+
+class main{
++main(args: String[]):void
+}
+
+package PresentationLayer{
+  class Splendor{
+    frame: JFrame
+    gameBoy: GameBoy
+    g: Graphics
+
+    +loadGame(): void
+    +playGame(): void
+  }
+}
+
+package DomainLayer{
+  class GameBoy{
+    cards: List<Card>
+    players: List<Player>
+    currChips: Set<String>
+    currPlayer: Player
+    +getPlayers(): List<Players>
+    +getCards(): List<Cards>
+    +loadGame(): void
+    +makeMove(movIndex: int, move: String): boolean
+    -getCurrentPlayer(): Player
+    -gameOver(): boolean
+  }
+
+  class Card{
+    victoryPoints: int
+    cost: String
+    toString(): String
+  }
+
+  class Player{
+    totalVP: int
+    chips: Map<Character, Integer>
+    name: String
+    drawChip(color: String): boolean
+    buyCard(card: Card): boolean
+    toString(): String
+  }
+}
+package DataLayer{
+  class DataLoader{
+   loadprevGame(): String
+   loadCards(): String
+  }
+}
+
+main --> Splendor
+
+Splendor --> GameBoy
+
+Splendor ..> Card
+
+Splendor ..> Player
+
+GameBoy --> DataLoader
+
+GameBoy -r-> Card
+
+GameBoy -l-> Player
+
+@enduml
+
+this is my uml for a software I'm implementing, could you write the code for this as best as you can

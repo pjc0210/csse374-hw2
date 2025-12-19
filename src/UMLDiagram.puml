@@ -1,0 +1,59 @@
+@startuml
+
+class main{
+
+}
+package PresentationLayer{
+  class Splendor{
+    frame: JFrame
+    gameBoy: GameBoy
+  }
+}
+package DomainLayer{
+  class GameBoy{
+    cards: List<Card>
+    players: List<Player>
+    currChips: Set<String>
+
+    +getPlayers(): List<Players>
+    +getCards(): List<Cards>
+    +loadGame(): void
+    +makeMove(movIndex: int, move: String): boolean
+    -gameOver(): boolean
+
+  }
+
+  class Card{
+    victoryPoints: int
+    cost: String
+    toString(): String
+  }
+
+  class Player{
+    totalVP: int
+    chips: Map<Character, Integer>
+    drawChip(color: String): boolean
+    buyCard(card: Card): boolean
+    toString(): String
+  }
+}
+package DataLayer{
+
+  class DataLoader{
+   loadprevGame(): String
+   loadCards(): String
+  }
+}
+
+main --> Splendor
+
+Splendor --> GameBoy
+
+Splendor ..> Card
+
+Splendor ..> Player
+
+GameBoy --> DataLoader
+
+
+@enduml

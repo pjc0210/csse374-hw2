@@ -1,0 +1,58 @@
+{
+  "player": {
+    "0": {
+      "totalVP": 10,
+      "chips": {
+        "R": 1,
+        "B": 2,
+        "G": 3,
+        "K": 0,
+        "W": 0
+      }
+    },
+    "1": {
+      "totalVP": 8,
+      "chips": {
+        "R": 12,
+        "B": 0,
+        "G": 2,
+        "K": 0,
+        "W": 1
+      }
+    }
+  },
+  "cards": {
+    "0": {"victoryPoint": 1,
+        "cost": "1B2W"},
+    "1": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "2": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "3": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "4": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "5": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "6": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "7": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "8": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "9": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "10": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "11": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "12": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "13": {"victoryPoint": 1,
+      "cost": "1B2W"},
+    "14": {"victoryPoint": 1,
+      "cost": "1B2W"}
+  },
+  "cardsRemaining": [1, 2, 3, 4, 5],
+  "currTurn": 0
+}

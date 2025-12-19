@@ -12,7 +12,6 @@ package PresentationLayer{
 
     +loadGame(): void
     +playGame(): void
-
   }
 }
 
@@ -21,11 +20,12 @@ package DomainLayer{
     cards: List<Card>
     players: List<Player>
     currChips: Set<String>
-
+    currPlayer: Player
     +getPlayers(): List<Players>
     +getCards(): List<Cards>
     +loadGame(): void
     +makeMove(movIndex: int, move: String): boolean
+    -getCurrentPlayer(): Player
     -gameOver(): boolean
   }
 
@@ -45,7 +45,6 @@ package DomainLayer{
   }
 }
 package DataLayer{
-
   class DataLoader{
    loadprevGame(): String
    loadCards(): String
@@ -62,5 +61,8 @@ Splendor ..> Player
 
 GameBoy --> DataLoader
 
+GameBoy -r-> Card
+
+GameBoy -l-> Player
 
 @enduml

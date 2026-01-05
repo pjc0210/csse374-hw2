@@ -3,7 +3,7 @@ import Presentation.Splendor;
 /**
  * Main entry point for the Splendor game application.
  */
-public class main {
+public class Main {
 
     public static void main(String[] args) {
         // Set look and feel to system default for better appearance

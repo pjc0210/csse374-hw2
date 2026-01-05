@@ -1,6 +1,6 @@
 @startuml
 
-class main{
+class Main{
 +main(args: String[]):void
 }
 
@@ -51,7 +51,7 @@ package DataLayer{
   }
 }
 
-main --> Splendor
+Main --> Splendor
 
 Splendor --> GameBoy
 

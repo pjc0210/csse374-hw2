@@ -1,0 +1,20 @@
+using the repository as context:
+
+Prompt 1:
+using UMLDiagram-new.puml generate the code for a splendor game
+
+Prompt 2:
+create a nicer looking gui that also displays the cards and their cost
+
+Prompt 3:
+add the ability to draw white, green, blue, black, and red chips
+
+Prompt 4:
+have the game swap between 2 players
+
+Prompt 5:
+include logic to automatically swap turns when 2 tokens of the same color are drawn, 3 total tokens are drawn, or a card is bought
+
+Prompt 6:
+make sure a player cannot buy and draw chips at the same time
+

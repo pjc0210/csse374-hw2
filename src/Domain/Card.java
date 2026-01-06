@@ -1,70 +1,50 @@
 package Domain;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Represents a card in the Splendor game.
- * Each card has victory points and a cost in gem chips.
+ * Simple Card model (victoryPoints and cost string like "1B2W").
  */
 public class Card {
     private int victoryPoints;
-    private Map<Character, Integer> cost; // Color -> amount mapping
-    private char gemType; // The gem type this card provides as a bonus
+    private String cost; // format example: "1B2W" meaning 1 Blue, 2 White
 
-    public Card(int victoryPoints, String costString, char gemType) {
+    public Card(int victoryPoints, String cost) {
         this.victoryPoints = victoryPoints;
-        this.cost = parseCost(costString);
-        this.gemType = gemType;
-    }
-
-    /**
-     * Parses a cost string into a map of gem colors to amounts.
-     * Format example: "R3,G2,B1" means 3 red, 2 green, 1 blue
-     */
-    private Map<Character, Integer> parseCost(String costString) {
-        Map<Character, Integer> costMap = new HashMap<>();
-        if (costString == null || costString.isEmpty()) {
-            return costMap;
-        }
-
-        String[] parts = costString.split(",");
-        for (String part : parts) {
-            if (part.length() >= 2) {
-                char color = part.charAt(0);
-                int amount = Integer.parseInt(part.substring(1));
-                costMap.put(color, amount);
-            }
-        }
-        return costMap;
+        this.cost = cost == null ? "" : cost;
     }
 
     public int getVictoryPoints() {
         return victoryPoints;
     }
 
-    public Map<Character, Integer> getCost() {
-        return new HashMap<>(cost);
+    public String getCost() {
+        return cost;
     }
 
-    public char getGemType() {
-        return gemType;
+    /**
+     * Parse the cost string into a map of color char -> required count.
+     */
+    public Map<Character, Integer> getCostMap() {
+        Map<Character, Integer> m = new HashMap<>();
+        String s = cost.trim();
+        int i = 0;
+        while (i < s.length()) {
+            // read number
+            int start = i;
+            while (i < s.length() && Character.isDigit(s.charAt(i))) i++;
+            if (start == i) break;
+            int count = Integer.parseInt(s.substring(start, i));
+            if (i >= s.length()) break;
+            char color = s.charAt(i++);
+            m.put(color, m.getOrDefault(color, 0) + count);
+        }
+        return m;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Card[VP:").append(victoryPoints);
-        sb.append(", Gem:").append(gemType);
-        sb.append(", Cost:");
-        if (cost.isEmpty()) {
-            sb.append("Free");
-        } else {
-            for (Map.Entry<Character, Integer> entry : cost.entrySet()) {
-                sb.append(entry.getKey()).append(":").append(entry.getValue()).append(" ");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
+        return "Card[vp=" + victoryPoints + ", cost=" + cost + "]";
     }
 }

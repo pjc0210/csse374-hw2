@@ -27,6 +27,7 @@ package DomainLayer{
     +makeMove(movIndex: int, move: String): boolean
     -getCurrentPlayer(): Player
     -gameOver(): boolean
+    -loadCards(): String
   }
 
   class Card{
@@ -47,7 +48,6 @@ package DomainLayer{
 package DataLayer{
   class DataLoader{
    loadprevGame(): String
-   loadCards(): String
   }
 }
 

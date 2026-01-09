@@ -18,3 +18,50 @@ include logic to automatically swap turns when 2 tokens of the same color are dr
 Prompt 6:
 make sure a player cannot buy and draw chips at the same time
 
+Prompt 7:
+parseCards does not work
+
+Prompt 8:
+can you wrap the cards so that all cards are displayed on hte homepage without scrolling
+
+Prompt 9:
+increase the window size horizontally so i can fit the cards in a 3x5 format. I also somehow am losing a few cards -> there should be 15 cards
+
+Prompt 10:
+please verify that all 15 cards are displayed
+
+Prompt 11:
+add functionality to save the game state after every move made
+
+Prompt 12:
+implement functionality to generate a new game at any point where the cards are randomly generated
+
+Prompt 13:
+make sure the generated cards require 0-3 tokens of a color with at least 2 of some color and at most 3 colors. Also make sure the more a card costs, the higher VP it's worth
+
+Prompt 14:
+card 10 costs 5 chips total, so it's VP should be higher
+
+Prompt 15:
+have a wider range of victory points, repeated chips are more difficult than a variety of chips of small amounts
+
+Prompt 16:
+player is only able to draw one token regardless of color, they should be able to draw 3 of different colors or or 2 of the same color in a turn
+
+Prompt 17:
+the player isn't prevented from drawing 2 different color chips and then drawing a chip of a drawn color
+
+Prompt 18:
+the invalid scenario described above is still considered valid
+ 
+// from the output for prompt 17
+// Updated chip drawing validation:
+
+// Valid scenario 1: Draw Red → Draw Red (2 same color, turn ends)
+// Valid scenario 2: Draw Red → Draw Blue → Draw Green (3 different colors, turn ends)
+// Invalid scenario: Draw Red → Draw Blue → Draw Red (rejected on 3rd draw)
+
+// *gave up on getting vscode to write the logic, so manually edited the chip drawing functionality*
+Prompt 19:
+implement logic to stop the game if it's over and to display a popup to starta new game or quit
+

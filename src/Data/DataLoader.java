@@ -25,4 +25,12 @@ public class DataLoader {
             return "";
         }
     }
+
+    public void saveGame(String json) {
+        try {
+            Files.write(dbPath, json.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

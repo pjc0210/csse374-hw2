@@ -21,6 +21,9 @@ public class Splendor extends JFrame {
     private JPanel cardsPanel;
     private JLabel statusLabel;
 
+    // track if we've shown the game-over dialog for the current finished game
+    private boolean gameOverDialogShown = false;
+
     public Splendor() {
         super("Mini Splendor");
         this.gameBoy = new GameBoy();
@@ -30,7 +33,8 @@ public class Splendor extends JFrame {
     private void initUI() {
         frame = this;
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
+        // increase window width so a 3x5 card grid can fit comfortably
+        frame.setSize(1200, 700);
         frame.setLayout(new BorderLayout(8, 8));
 
         // Top status
@@ -38,10 +42,12 @@ public class Splendor extends JFrame {
         statusLabel.setBorder(BorderFactory.createEmptyBorder(6,6,6,6));
         frame.add(statusLabel, BorderLayout.NORTH);
 
-        // Center: cards grid inside a scroll pane
+        // Center: cards grid inside a scroll pane (disable scrollbars; we'll size components to fit)
         cardsPanel = new JPanel();
-        cardsPanel.setLayout(new WrapLayout(FlowLayout.LEFT, 8, 8));
+        cardsPanel.setLayout(new GridLayout(1, 1, 8, 8));
         JScrollPane cardsScroll = new JScrollPane(cardsPanel);
+        cardsScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        cardsScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         frame.add(cardsScroll, BorderLayout.CENTER);
 
         // Right: log area
@@ -55,9 +61,11 @@ public class Splendor extends JFrame {
         // Bottom: controls
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 6));
         JButton loadBtn = new JButton("Load Game");
+        JButton newGameBtn = new JButton("New Game");
         
         JLabel drawLabel = new JLabel("Draw chips:");
         controls.add(loadBtn);
+        controls.add(newGameBtn);
         controls.add(drawLabel);
         
         // Draw buttons for each color: W (White), G (Green), B (Blue), K (Black), R (Red)
@@ -75,13 +83,22 @@ public class Splendor extends JFrame {
             });
             controls.add(btn);
         }
-        
+        if(gameBoy.gameOver()){
+
+        }
         JButton refreshBtn = new JButton("Refresh");
         controls.add(refreshBtn);
         frame.add(controls, BorderLayout.SOUTH);
 
         loadBtn.addActionListener(e -> {
+            gameOverDialogShown = false;
             loadGame();
+        });
+        newGameBtn.addActionListener(e -> {
+            gameOverDialogShown = false;
+            gameBoy.newGame();
+            log("New game generated.");
+            refreshUI();
         });
         refreshBtn.addActionListener(e -> refreshUI());
     }
@@ -105,6 +122,13 @@ public class Splendor extends JFrame {
 
         cardsPanel.removeAll();
         List<Card> cards = gameBoy.getCards();
+
+        // use fixed 3 columns so 15 cards become a 3x5 grid when present
+        int cols = 3;
+        int rows = Math.max(1, (cards.size() + cols - 1) / cols);
+        int hgap = 8;
+        cardsPanel.setLayout(new GridLayout(rows, cols, hgap, 8));
+
         for (int i = 0; i < cards.size(); i++) {
             Card c = cards.get(i);
             CardView cv = new CardView(c, i, new ActionListener() {
@@ -125,6 +149,31 @@ public class Splendor extends JFrame {
         }
         cardsPanel.revalidate();
         cardsPanel.repaint();
+
+        // If game ended, show a one-time dialog asking to start a new game or quit
+        if (gameBoy.isGameOver() && !gameOverDialogShown) {
+            gameOverDialogShown = true;
+            Player winner = gameBoy.getWinner();
+            String winnerText = winner == null ? "No winner" : winner.getName();
+            int choice = JOptionPane.showOptionDialog(frame,
+                    "Game over. Winner: " + winnerText + "\nWould you like to start a new game or quit?",
+                    "Game Over",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    new String[]{"New Game", "Quit"},
+                    "New Game");
+            if (choice == 0) {
+                // start a new game
+                gameOverDialogShown = false;
+                gameBoy.newGame();
+                log("New game generated.");
+                refreshUI();
+            } else {
+                // quit the application
+                System.exit(0);
+            }
+        }
     }
 
     // show UI

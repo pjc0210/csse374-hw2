@@ -1,57 +1,42 @@
 {
   "player": {
     "0": {
-      "totalVP": 10,
+      "totalVP": 0,
       "chips": {
-        "R": 1,
-        "B": 2,
-        "G": 3,
+        "R": 0,
+        "B": 0,
+        "G": 0,
         "K": 0,
         "W": 0
       }
     },
     "1": {
-      "totalVP": 8,
+      "totalVP": 0,
       "chips": {
-        "R": 12,
+        "R": 0,
         "B": 0,
-        "G": 2,
+        "G": 0,
         "K": 0,
-        "W": 1
+        "W": 0
       }
     }
   },
   "cards": {
-    "0": {"victoryPoint": 1,
-        "cost": "1B2W"},
-    "1": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "2": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "3": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "4": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "5": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "6": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "7": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "8": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "9": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "10": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "11": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "12": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "13": {"victoryPoint": 1,
-      "cost": "1B2W"},
-    "14": {"victoryPoint": 1,
-      "cost": "1B2W"}
+    "0": {"victoryPoint": 3, "cost": "3K"},
+    "1": {"victoryPoint": 1, "cost": "2K"},
+    "2": {"victoryPoint": 1, "cost": "2W"},
+    "3": {"victoryPoint": 3, "cost": "3K"},
+    "4": {"victoryPoint": 2, "cost": "2G1R"},
+    "5": {"victoryPoint": 3, "cost": "3G"},
+    "6": {"victoryPoint": 3, "cost": "3B"},
+    "7": {"victoryPoint": 3, "cost": "3R"},
+    "8": {"victoryPoint": 3, "cost": "3G"},
+    "9": {"victoryPoint": 3, "cost": "2G3K"},
+    "10": {"victoryPoint": 1, "cost": "2B"},
+    "11": {"victoryPoint": 1, "cost": "2K"},
+    "12": {"victoryPoint": 4, "cost": "3K3G"},
+    "13": {"victoryPoint": 3, "cost": "3G"},
+    "14": {"victoryPoint": 4, "cost": "1B3G3R"}
   },
   "cardsRemaining": [1, 2, 3, 4, 5],
   "currTurn": 0

@@ -75,6 +75,14 @@ public class Player {
         return true;
     }
 
+    public void resetChips() {
+        chips.clear();
+    }
+
+    public void resetVP() {
+        totalVP = 0;
+    }
+
     @Override
     public String toString() {
         return name + "(VP=" + totalVP + ", chips=" + chips + ")";

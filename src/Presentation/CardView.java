@@ -49,6 +49,10 @@ public class CardView extends JPanel {
             cl.setHorizontalAlignment(SwingConstants.CENTER);
             cl.setPreferredSize(new Dimension(36, 22));
             cl.setBackground(colorOf(color));
+            if (color == 'K') {
+                // set text to white
+                cl.setForeground(Color.WHITE);
+            }
             center.add(cl);
         }
 
@@ -66,7 +70,7 @@ public class CardView extends JPanel {
             case 'B': return new Color(80, 130, 220);
             case 'G': return new Color(100, 180, 100);
             case 'W': return new Color(240, 240, 230);
-            case 'K': return new Color(240, 200, 80);
+            case 'K': return new Color(0, 0, 0);
             default: return new Color(200, 200, 200);
         }
     }

@@ -4,40 +4,39 @@
       "totalVP": 0,
       "chips": {
         "R": 0,
-        "B": 0,
+        "B": 2,
         "G": 0,
         "K": 0,
-        "W": 0
+        "W": 1
       }
     },
     "1": {
-      "totalVP": 0,
+      "totalVP": 1,
       "chips": {
         "R": 0,
         "B": 0,
-        "G": 0,
+        "G": 2,
         "K": 0,
         "W": 0
       }
     }
   },
   "cards": {
-    "0": {"victoryPoint": 3, "cost": "3K"},
-    "1": {"victoryPoint": 1, "cost": "2K"},
-    "2": {"victoryPoint": 1, "cost": "2W"},
-    "3": {"victoryPoint": 3, "cost": "3K"},
-    "4": {"victoryPoint": 2, "cost": "2G1R"},
-    "5": {"victoryPoint": 3, "cost": "3G"},
-    "6": {"victoryPoint": 3, "cost": "3B"},
-    "7": {"victoryPoint": 3, "cost": "3R"},
-    "8": {"victoryPoint": 3, "cost": "3G"},
-    "9": {"victoryPoint": 3, "cost": "2G3K"},
-    "10": {"victoryPoint": 1, "cost": "2B"},
-    "11": {"victoryPoint": 1, "cost": "2K"},
-    "12": {"victoryPoint": 4, "cost": "3K3G"},
-    "13": {"victoryPoint": 3, "cost": "3G"},
-    "14": {"victoryPoint": 4, "cost": "1B3G3R"}
+    "0": {"victoryPoint": 3, "cost": "3R"},
+    "1": {"victoryPoint": 3, "cost": "3W"},
+    "2": {"victoryPoint": 4, "cost": "1R3B3W"},
+    "3": {"victoryPoint": 3, "cost": "3R2K"},
+    "4": {"victoryPoint": 1, "cost": "2W"},
+    "5": {"victoryPoint": 4, "cost": "1G2W3B"},
+    "6": {"victoryPoint": 4, "cost": "2K3R3G"},
+    "7": {"victoryPoint": 2, "cost": "2R2B"},
+    "8": {"victoryPoint": 3, "cost": "3B1K"},
+    "9": {"victoryPoint": 3, "cost": "3B"},
+    "10": {"victoryPoint": 3, "cost": "3R"},
+    "11": {"victoryPoint": 2, "cost": "1G2K"},
+    "12": {"victoryPoint": 3, "cost": "2R3W"},
+    "13": {"victoryPoint": 4, "cost": "1W2R3B"}
   },
-  "cardsRemaining": [1, 2, 3, 4, 5],
+  "cardsRemaining": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   "currTurn": 0
 }

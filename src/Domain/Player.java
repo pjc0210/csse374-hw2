@@ -9,7 +9,14 @@ public class Player {
     private int totalVP;
     private Map<Character, Integer> chips; // e.g., 'R' -> 2, 'B' -> 1, 'K' -> gold
 
-    public Player(String name) {
+    public Player(String name, int initVP, Map<Character, Integer> initialChips){
+        System.out.println("Initial chips map: " + initialChips);
+        this.name = name == null ? "Player" : name;
+        this.totalVP = initVP;
+        this.chips = new HashMap<>(initialChips);
+    }
+
+    public Player(String name){
         this.name = name == null ? "Player" : name;
         this.totalVP = 0;
         this.chips = new HashMap<>();

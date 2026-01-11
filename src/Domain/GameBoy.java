@@ -85,7 +85,7 @@ public class GameBoy {
             int concentrationBonus = Math.max(0, maxSingleColor - 2);
             int vp = 1 + baseCost + concentrationBonus;
             
-            cards.add(new Card(vp, cost.toString()));
+            cards.add(new Card(vp, cost.toString(), i));
         }
     }
 
@@ -127,36 +127,34 @@ public class GameBoy {
             Pattern vp = Pattern.compile("\"totalVP\"\s*:\s*(\\d+)");
             Matcher mvp = vp.matcher(body);
             int totalVP = mvp.find() ? Integer.parseInt(mvp.group(1)) : 0;
-            Player pl = new Player("Player" + (players.size() + 1));
             // chips
+            Map<Character, Integer> initialChips = new java.util.HashMap<>();
             Pattern chips = Pattern.compile("\"chips\"\s*:\s*\\{(.*?)\\}", Pattern.DOTALL);
             Matcher mch = chips.matcher(body);
             if (mch.find()) {
                 String chipsBlock = mch.group(1);
+                System.out.println("Chips block: " + chipsBlock);
                 Pattern chipEntry = Pattern.compile("\"(\\w)\"\s*:\s*(\\d+)");
+                System.out.println("Chip entry pattern: " + chipEntry);
                 Matcher mce = chipEntry.matcher(chipsBlock);
                 while (mce.find()) {
                     char color = mce.group(1).charAt(0);
                     int count = Integer.parseInt(mce.group(2));
-                    for (int i = 0; i < count; i++) pl.drawChip(String.valueOf(color));
+                    initialChips.put(color, count);
                 }
             }
             // set VP
             // Because Player currently only adds VP when buying, set directly via reflection-like workaround
-            try {
-                java.lang.reflect.Field f = Player.class.getDeclaredField("totalVP");
-                f.setAccessible(true);
-                f.setInt(pl, totalVP);
-            } catch (Exception e) {
-                // ignore
-            }
+            
+            Player pl = new Player("Player" + (players.size() + 1), totalVP, initialChips);
             players.add(pl);
         }
     }
 
     private void parseCards(String json) {
-        System.out.println(json);
+        // System.out.println(json);
         cards.clear();
+        int ind = 0;
         if (json == null) return;
         int idx = json.indexOf("\"cards\"");
         if (idx == -1) return;
@@ -201,7 +199,7 @@ public class GameBoy {
             Pattern cost = Pattern.compile("\"cost\"\\s*:\\s*\"(.*?)\"");
             Matcher mco = cost.matcher(body);
             String c = mco.find() ? mco.group(1) : "";
-            cards.add(new Card(v, c));
+            cards.add(new Card(v, c, ind++));
         }
     }
 
@@ -231,7 +229,7 @@ public class GameBoy {
             
             boolean shouldSwap = false;
             if (ok) {
-                System.out.println("Player drew chip: " + chipDrawn);
+                // System.out.println("Player drew chip: " + chipDrawn);
                 // condition 1: 2 tokens of same color
                 if (chipDrawn && currChips.size() == 1 && currChips.containsKey(c)) {
                     shouldSwap = true;
@@ -252,7 +250,7 @@ public class GameBoy {
             if(!chipDrawn) chipDrawn = true;
 
             if (shouldSwap) {
-                    System.out.println("Turn ends after drawing chips");
+                    // System.out.println("Turn ends after drawing chips");
                     nextTurn();
                 }
                 
@@ -262,7 +260,7 @@ public class GameBoy {
         } else if (move.startsWith("buy:")) {
             // cannot buy if already took an action (drew chips) this turn
             if (chipDrawn) {
-                System.out.println("Cannot buy after drawing chips"); 
+                // System.out.println("Cannot buy after drawing chips"); 
                 return false;
             }
 
@@ -280,7 +278,7 @@ public class GameBoy {
                 }
                 return ok;
             } catch (NumberFormatException e) {
-                System.out.println("Failed to parse buy index: " + idxStr);
+                // System.out.println("Failed to parse buy index: " + idxStr);
                 return false;
             }
         }
@@ -336,10 +334,12 @@ public class GameBoy {
             json.append("      \"chips\": {\n");
             // use the player's existing chip map
             Map<Character, Integer> chipCounts = p.getChips();
+            // System.out.println(chipCounts);
             List<Character> colors = java.util.Arrays.asList('R', 'B', 'G', 'K', 'W');
             for (int ci = 0; ci < colors.size(); ci++) {
                 char color = colors.get(ci);
                 int count = chipCounts.getOrDefault(color, 0);
+                // System.out.println(count);
                 json.append("        \"").append(color).append("\": ").append(count);
                 if (ci < colors.size() - 1) json.append(",");
                 json.append("\n");
@@ -358,9 +358,16 @@ public class GameBoy {
             json.append("\n");
         }
         json.append("  },\n");
-        json.append("  \"cardsRemaining\": [1, 2, 3, 4, 5],\n");
+        json.append("  \"cardsRemaining\": [");
+        List<Card> cards = getCards();
+        json.append(cards.get(0).id);
+        for(int j = 1; j < cards.size(); j++){
+            json.append(", " + cards.get(j).id);
+        } 
+        json.append( "],\n");
         json.append("  \"currTurn\": ").append(currentPlayerIndex).append("\n");
         json.append("}\n");
+        // System.out.println("Saving game state:\n" + json.toString());
         dataLoader.saveGame(json.toString());
     }
 

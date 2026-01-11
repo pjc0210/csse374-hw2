@@ -7,12 +7,14 @@ import java.util.Map;
  * Simple Card model (victoryPoints and cost string like "1B2W").
  */
 public class Card {
+    public int id;
     private int victoryPoints;
     private String cost; // format example: "1B2W" meaning 1 Blue, 2 White
 
-    public Card(int victoryPoints, String cost) {
+    public Card(int victoryPoints, String cost, int id) {
         this.victoryPoints = victoryPoints;
         this.cost = cost == null ? "" : cost;
+        this.id = id;
     }
 
     public int getVictoryPoints() {

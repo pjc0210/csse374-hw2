@@ -6,17 +6,17 @@
         "R": 2,
         "B": 0,
         "G": 0,
-        "K": 3,
+        "K": 4,
         "W": 2
       }
     },
     "1": {
-      "totalVP": 4,
+      "totalVP": 7,
       "chips": {
         "R": 2,
         "B": 0,
-        "G": 2,
-        "K": 3,
+        "G": 0,
+        "K": 2,
         "W": 1
       }
     }
@@ -27,14 +27,13 @@
     "2": {"victoryPoint": 4, "cost": "3K2R1W"},
     "3": {"victoryPoint": 3, "cost": "3K2R"},
     "4": {"victoryPoint": 3, "cost": "3K1W"},
-    "5": {"victoryPoint": 3, "cost": "3G"},
-    "6": {"victoryPoint": 3, "cost": "3R"},
-    "7": {"victoryPoint": 1, "cost": "2R"},
-    "8": {"victoryPoint": 2, "cost": "1W2R"},
-    "9": {"victoryPoint": 4, "cost": "3K2W3R"},
-    "10": {"victoryPoint": 3, "cost": "1R3W"},
-    "11": {"victoryPoint": 3, "cost": "3G"}
+    "5": {"victoryPoint": 3, "cost": "3R"},
+    "6": {"victoryPoint": 1, "cost": "2R"},
+    "7": {"victoryPoint": 2, "cost": "1W2R"},
+    "8": {"victoryPoint": 4, "cost": "3K2W3R"},
+    "9": {"victoryPoint": 3, "cost": "1R3W"},
+    "10": {"victoryPoint": 3, "cost": "3G"}
   },
-  "cardsRemaining": [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12],
+  "cardsRemaining": [0, 1, 2, 3, 4, 6, 7, 9, 10, 11, 12],
   "currTurn": 0
 }

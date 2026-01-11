@@ -48,18 +48,13 @@ public class Player {
     public boolean buyCard(Card card) {
         Map<Character, Integer> cost = card.getCostMap();
         // compute deficit after using existing chips; gold 'K' can be used as wildcard
-        int goldAvailable = chips.getOrDefault('K', 0);
-        int totalDeficit = 0;
-        Map<Character, Integer> deficits = new HashMap<>();
         for (Map.Entry<Character, Integer> e : cost.entrySet()) {
             char color = e.getKey();
             int need = e.getValue();
             int have = chips.getOrDefault(color, 0);
             int deficit = Math.max(0, need - have);
-            deficits.put(color, deficit);
-            totalDeficit += deficit;
+            if (deficit > 0) return false;
         }
-        if (totalDeficit > goldAvailable) return false; // not enough even using gold
 
         // deduct specific colors first
         for (Map.Entry<Character, Integer> e : cost.entrySet()) {
@@ -70,12 +65,6 @@ public class Player {
             if (use > 0) {
                 chips.put(color, have - use);
             }
-        }
-        // spend gold for remaining deficits
-        int goldToSpend = 0;
-        for (int d : deficits.values()) goldToSpend += d;
-        if (goldToSpend > 0) {
-            chips.put('K', goldAvailable - goldToSpend);
         }
         // award VP
         totalVP += card.getVictoryPoints();

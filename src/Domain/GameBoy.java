@@ -129,18 +129,20 @@ public class GameBoy {
             int totalVP = mvp.find() ? Integer.parseInt(mvp.group(1)) : 0;
             // chips
             Map<Character, Integer> initialChips = new java.util.HashMap<>();
-            Pattern chips = Pattern.compile("\"chips\"\s*:\s*\\{(.*?)\\}", Pattern.DOTALL);
+            Pattern chips = Pattern.compile("\"chips\"\s*:\s*\\{(\\s*\".\": \\d,)+\\s*\".\": \\d", Pattern.DOTALL);
             Matcher mch = chips.matcher(body);
             if (mch.find()) {
-                String chipsBlock = mch.group(1);
-                System.out.println("Chips block: " + chipsBlock);
-                Pattern chipEntry = Pattern.compile("\"(\\w)\"\s*:\s*(\\d+)");
-                System.out.println("Chip entry pattern: " + chipEntry);
-                Matcher mce = chipEntry.matcher(chipsBlock);
-                while (mce.find()) {
-                    char color = mce.group(1).charAt(0);
-                    int count = Integer.parseInt(mce.group(2));
-                    initialChips.put(color, count);
+                for(int i = 0; i < mch.groupCount(); i++) {
+                    String chipsBlock = mch.group(i);
+                    System.out.println("Chips block: " + chipsBlock);
+                    Pattern chipEntry = Pattern.compile("\"(\\w)\"\s*:\s*(\\d+)");
+                    System.out.println("Chip entry pattern: " + chipEntry);
+                    Matcher mce = chipEntry.matcher(chipsBlock);
+                    while (mce.find()) {
+                        char color = mce.group(1).charAt(0);
+                        int count = Integer.parseInt(mce.group(2));
+                        initialChips.put(color, count);
+                    }
                 }
             }
             // set VP

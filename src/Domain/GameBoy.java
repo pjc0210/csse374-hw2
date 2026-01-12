@@ -1,363 +1,385 @@
 package Domain;
 
 import Data.DataLoader;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Main game controller for Splendor.
- * Manages game state, players, cards, and turn logic.
+ * Basic game engine for a minimal Splendor-like game. Parses the provided
+ * database.json (very forgiving parsing) and provides simple moves.
  */
 public class GameBoy {
-    private List<Card> cards;
-    private List<Player> players;
-    private Set<String> currChips; // Available chips in the bank
-    private Map<Character, Integer> chipBank; // Chip counts in bank
+    private List<Card> cards = new ArrayList<>();
+    private List<Player> players = new ArrayList<>();
     private Player currPlayer;
-    private int currentPlayerIndex;
-    private DataLoader dataLoader;
-    private boolean gameLoaded;
+    private int currentPlayerIndex = 0;
+    private Map<Character, Integer> currChips = new java.util.HashMap<>();
+    private boolean chipDrawn = false;
+    private DataLoader dataLoader = new DataLoader();
 
-    private static final int WINNING_SCORE = 15;
+    public List<Player> getPlayers() { return players; }
+    public List<Card> getCards() { return cards; }
+//    public int getCurrentPlayerIndex() { return currentPlayerIndex; }
 
-    public GameBoy() {
-        this.cards = new ArrayList<>();
-        this.players = new ArrayList<>();
-        this.currChips = new HashSet<>();
-        this.chipBank = new HashMap<>();
-        this.dataLoader = new DataLoader();
-        this.currentPlayerIndex = 0;
-        this.gameLoaded = false;
-
-        initializeChipBank();
-    }
-
-    /**
-     * Initialize the chip bank with starting chips.
-     */
-    private void initializeChipBank() {
-        // For 2-3 players: 4 of each gem, 5 gold
-        // For 4 players: 5 of each gem, 5 gold
-        int numPlayers = players.size() == 0 ? 2 : players.size();
-        int chipsPerColor = numPlayers >= 4 ? 7 : 4;
-
-        chipBank.put('R', chipsPerColor); // Red
-        chipBank.put('G', chipsPerColor); // Green
-        chipBank.put('B', chipsPerColor); // Blue
-        chipBank.put('W', chipsPerColor); // White
-        chipBank.put('K', chipsPerColor); // Black
-        chipBank.put('Y', 5);               // Gold (wild)
-
-        // Update currChips set
-        currChips.clear();
-        for (char color : chipBank.keySet()) {
-            if (chipBank.get(color) > 0) {
-                currChips.add(String.valueOf(color));
-            }
+    public void newGame() {
+        // reset players' chips and VP, reset current turn, generate random cards
+        for (Player p : players) {
+            p.resetChips();
+            p.resetVP();
         }
-    }
-
-    /**
-     * Load the game - either from save or start new.
-     */
-    public void loadGame() {
-        // Try to load previous game
-        String savedGame = dataLoader.loadPrevGame();
-
-        if (savedGame != null && !savedGame.isEmpty()) {
-            System.out.println("Loading saved game...");
-            parseSavedGame(savedGame);
-            gameLoaded = true;
-        } else {
-            System.out.println("Starting new game...");
-            startNewGame();
-            gameLoaded = true;
-        }
-    }
-
-    /**
-     * Start a new game with default setup.
-     */
-    private void startNewGame() {
-        // Create players
-        players.add(new Player("Player 1"));
-        players.add(new Player("Player 2"));
-
-        // Load cards
-        String cardData = dataLoader.loadCards();
-        parseCards(cardData);
-
-        // Shuffle cards
-        Collections.shuffle(cards);
-
-        // Set current player
         currentPlayerIndex = 0;
-        currPlayer = players.get(currentPlayerIndex);
-
-        // Initialize chip bank
-        initializeChipBank();
-
-        System.out.println("New game started with " + players.size() + " players");
-        System.out.println("Loaded " + cards.size() + " cards");
+        currPlayer = players.isEmpty() ? null : players.get(0);
+        currChips.clear();
+        generateRandomCards();
+        saveGameState();
     }
 
-    /**
-     * Parse card data from string format.
-     */
-    private void parseCards(String cardData) {
-        if (cardData == null || cardData.isEmpty()) {
-            return;
-        }
-
-        String[] lines = cardData.split("\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-
-            String[] parts = line.split(",");
-            if (parts.length >= 3) {
-                int vp = Integer.parseInt(parts[0]);
-                String cost = parts[1];
-                char gemType = parts[2].charAt(0);
-                cards.add(new Card(vp, cost, gemType));
-            }
-        }
-    }
-
-    /**
-     * Parse saved game data.
-     */
-    private void parseSavedGame(String savedGame) {
-        // Basic parsing - extend as needed
-        String[] sections = savedGame.split("---");
-
-        if (sections.length > 0) {
-            // Parse player data
-            String[] playerLines = sections[0].split("\n");
-            for (String line : playerLines) {
-                if (line.startsWith("Player:")) {
-                    // Parse player info
-                    String name = line.substring(7).trim();
-                    players.add(new Player(name));
+    private void generateRandomCards() {
+        cards.clear();
+        java.util.Random rand = new java.util.Random();
+        String[] colors = {"R", "B", "G", "K", "W"};
+        for (int i = 0; i < 15; i++) {
+            // pick 1-3 colors for this card
+            int numColors = 1 + rand.nextInt(3); // 1, 2, or 3 colors
+            java.util.List<String> selectedColors = new java.util.ArrayList<>();
+            while (selectedColors.size() < numColors) {
+                String color = colors[rand.nextInt(colors.length)];
+                if (!selectedColors.contains(color)) {
+                    selectedColors.add(color);
                 }
             }
+            
+            // generate costs: each color gets 0-3 tokens, but at least one color must have 2+
+            StringBuilder cost = new StringBuilder();
+            int[] costs = new int[selectedColors.size()];
+            int minIdx = rand.nextInt(selectedColors.size());
+            costs[minIdx] = 2 + rand.nextInt(2); // ensure at least one color has 2-3 tokens
+            for (int j = 0; j < costs.length; j++) {
+                if (j != minIdx) {
+                    costs[j] = rand.nextInt(4); // 0-3 tokens
+                }
+            }
+            
+            // build cost string
+            for (int j = 0; j < selectedColors.size(); j++) {
+                if (costs[j] > 0) {
+                    cost.append(costs[j]).append(selectedColors.get(j));
+                }
+            }
+            
+            // calculate VP based on total cost and concentration
+            // higher total cost = harder; repeated high amounts of one color = harder
+            int totalCost = 0;
+            int maxSingleColor = 0;
+            for (int c : costs) {
+                totalCost += c;
+                maxSingleColor = Math.max(maxSingleColor, c);
+            }
+            // VP = base (from total cost) + bonus (for concentration in one color)
+            // concentration bonus: each point above 2 of a single color adds VP
+            int baseCost = totalCost / 3; // scale down for wider range
+            int concentrationBonus = Math.max(0, maxSingleColor - 2);
+            int vp = 1 + baseCost + concentrationBonus;
+            
+            cards.add(new Card(vp, cost.toString(), i));
         }
+    }
 
-        if (sections.length > 1) {
-            // Parse card data
-            parseCards(sections[1]);
+    public void loadGame() {
+        String json = dataLoader.loadprevGame();
+        // if (json == null || json.isEmpty()) {
+        //     // create default data
+        //     Player p1 = new Player("Alice");
+        //     Player p2 = new Player("Bob");
+        //     players.add(p1);
+        //     players.add(p2);
+        //     // add some sample cards
+        //     cards.add(new Card(1, "1B2W"));
+        //     cards.add(new Card(2, "2R1G"));
+        //     cards.add(new Card(3, "3R"));
+        //     currPlayer = p1;
+        //     return;
+        // }
+
+        // Very small ad-hoc JSON parsing tailored to the repo's database.json
+        parsePlayers(json);
+        parseCards(json);
+        // System.out.println(this);
+        if (!players.isEmpty()) currPlayer = players.get(0);
+    }
+
+    private void parsePlayers(String json) {
+        players.clear();
+        Pattern p = Pattern.compile("\"player\"\s*:\s*\\{(.*?)\\},\\s*\\\"cards\"", Pattern.DOTALL);
+        Matcher m = p.matcher(json);
+        if (!m.find()) return;
+        String playersBlock = m.group(1);
+        // find each player: "0": { "totalVP": 10, "chips": { "R": 1, ... } }
+        Pattern pPlayer = Pattern.compile("\"\\d+\"\s*:\s*\\{(.*?)\\}", Pattern.DOTALL);
+        Matcher mp = pPlayer.matcher(playersBlock);
+        while (mp.find()) {
+            String body = mp.group(1);
+            // totalVP
+            Pattern vp = Pattern.compile("\"totalVP\"\s*:\s*(\\d+)");
+            Matcher mvp = vp.matcher(body);
+            int totalVP = mvp.find() ? Integer.parseInt(mvp.group(1)) : 0;
+            // chips
+            Map<Character, Integer> initialChips = new java.util.HashMap<>();
+            Pattern chips = Pattern.compile("\"chips\"\s*:\s*\\{(\\s*\".\": \\d,)+\\s*\".\": \\d", Pattern.DOTALL);
+            Matcher mch = chips.matcher(body);
+            if (mch.find()) {
+                for(int i = 0; i < mch.groupCount(); i++) {
+                    String chipsBlock = mch.group(i);
+                    System.out.println("Chips block: " + chipsBlock);
+                    Pattern chipEntry = Pattern.compile("\"(\\w)\"\s*:\s*(\\d+)");
+                    System.out.println("Chip entry pattern: " + chipEntry);
+                    Matcher mce = chipEntry.matcher(chipsBlock);
+                    while (mce.find()) {
+                        char color = mce.group(1).charAt(0);
+                        int count = Integer.parseInt(mce.group(2));
+                        initialChips.put(color, count);
+                    }
+                }
+            }
+            // set VP
+            // Because Player currently only adds VP when buying, set directly via reflection-like workaround
+            
+            Player pl = new Player("Player" + (players.size() + 1), totalVP, initialChips);
+            players.add(pl);
         }
+    }
 
-        // Set current player
-        if (!players.isEmpty()) {
-            currPlayer = players.get(0);
+    private void parseCards(String json) {
+        // System.out.println(json);
+        cards.clear();
+        int ind = 0;
+        if (json == null) return;
+        int idx = json.indexOf("\"cards\"");
+        if (idx == -1) return;
+        int start = json.indexOf('{', idx);
+        if (start == -1) return;
+        // find matching closing brace for the cards object
+        int depth = 0;
+        int end = -1;
+        for (int i = start; i < json.length(); i++) {
+            char ch = json.charAt(i);
+            if (ch == '{') depth++;
+            else if (ch == '}') {
+                depth--;
+                if (depth == 0) { end = i; break; }
+            }
+        }
+        if (end == -1) return;
+        String cardsBlock = json.substring(start + 1, end);
+        // System.out.println(cardsBlock);
+        // find each card entry by locating the key and matching its object braces
+        Pattern keyPattern = Pattern.compile("\"(\\d+)\"\\s*:\\s*\\{");
+        Matcher keyMatcher = keyPattern.matcher(cardsBlock);
+        while (keyMatcher.find()) {
+            int bracePos = cardsBlock.indexOf('{', keyMatcher.end() - 1);
+            if (bracePos == -1) continue;
+            int d = 0;
+            int objEnd = -1;
+            for (int i = bracePos; i < cardsBlock.length(); i++) {
+                char ch = cardsBlock.charAt(i);
+                if (ch == '{') d++;
+                else if (ch == '}') {
+                    d--;
+                    if (d == 0) { objEnd = i; break; }
+                }
+            }
+            if (objEnd == -1) continue;
+            String body = cardsBlock.substring(bracePos + 1, objEnd);
+            // System.out.println(body);
+            Pattern vp = Pattern.compile("\"victoryPoint\"\\s*:\\s*(\\d+)");
+            Matcher mvp = vp.matcher(body);
+            int v = mvp.find() ? Integer.parseInt(mvp.group(1)) : 0;
+            Pattern cost = Pattern.compile("\"cost\"\\s*:\\s*\"(.*?)\"");
+            Matcher mco = cost.matcher(body);
+            String c = mco.find() ? mco.group(1) : "";
+            cards.add(new Card(v, c, ind++));
         }
     }
 
     /**
-     * Make a move in the game.
-     * @param moveIndex The index/identifier of the move
-     * @param move The move type (e.g., "draw", "buy")
-     * @return true if move was valid and executed
+     * perform a move. move strings supported: "R" (draw) or "idx" (buy) (idx = index in cards list)
+     * Drawing: can draw up to 3 total tokens (different colors) OR 2 of same color, then turn swaps.
+     * Buying: ends the turn immediately.
+     * Player cannot both draw and buy in same turn.
      */
-    public boolean makeMove(int moveIndex, String move) {
-        if (currPlayer == null || gameOver()) {
-            return false;
-        }
-
-        boolean moveSuccess = false;
-
-        switch (move.toLowerCase()) {
-            case "draw":
-                moveSuccess = handleDrawChips(moveIndex);
-                break;
-            case "buy":
-                moveSuccess = handleBuyCard(moveIndex);
-                break;
-            case "reserve":
-                moveSuccess = handleReserveCard(moveIndex);
-                break;
-            default:
-                System.out.println("Unknown move type: " + move);
+    public boolean makeMove(int movIndex, String move) {
+        if (currPlayer == null) return false;
+        if (move == null) return false;
+        move = move.trim();
+        if (movIndex == 1) { //(move.startsWith("draw:")) {
+            // cannot draw if already bought this turn
+            
+            String color = move.substring("draw:".length());
+            char c = Character.toUpperCase(color.charAt(0));
+            
+            // if we already have 2 different colors, cannot draw any more
+            // (valid draws are: 3 different colors OR 2 of same color, not mixed)
+            if (currChips.size() >= 2 && currChips.containsKey(c)) {
                 return false;
-        }
-
-        if (moveSuccess) {
-            // Check if game is over
-            if (gameOver()) {
-                announceWinner();
-            } else {
-                // Switch to next player
-                nextPlayer();
             }
-        }
+            
+            boolean ok = currPlayer.drawChip(color);
+            
+            boolean shouldSwap = false;
+            if (ok) {
+                // System.out.println("Player drew chip: " + chipDrawn);
+                // condition 1: 2 tokens of same color
+                if (chipDrawn && currChips.size() == 1 && currChips.containsKey(c)) {
+                    shouldSwap = true;
+                }
 
-        return moveSuccess;
-    }
-
-    /**
-     * Handle drawing chips from the bank.
-     */
-    private boolean handleDrawChips(int colorCode) {
-        // colorCode could represent which colors to draw
-        // Simplified: draw single chip of specified color
-        char color = getColorFromCode(colorCode);
-
-        if (!chipBank.containsKey(color) || chipBank.get(color) <= 0) {
-            System.out.println("No chips available of that color");
-            return false;
-        }
-
-        if (currPlayer.drawChip(String.valueOf(color))) {
-            chipBank.put(color, chipBank.get(color) - 1);
-            updateCurrChips();
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Handle buying a card.
-     */
-    private boolean handleBuyCard(int cardIndex) {
-        if (cardIndex < 0 || cardIndex >= cards.size()) {
-            System.out.println("Invalid card index");
-            return false;
-        }
-
-        Card card = cards.get(cardIndex);
-        if (currPlayer.buyCard(card)) {
-            // Return chips to bank
-            returnChipsToBank(card);
-            // Remove card from available cards
-            cards.remove(cardIndex);
-            System.out.println(currPlayer.getName() + " bought a card!");
-            return true;
-        } else {
-            System.out.println("Cannot afford this card");
-            return false;
-        }
-    }
-
-    /**
-     * Handle reserving a card (simplified implementation).
-     */
-    private boolean handleReserveCard(int cardIndex) {
-        if (cardIndex < 0 || cardIndex >= cards.size()) {
-            return false;
-        }
-
-        // Simplified: just take a gold chip
-        if (chipBank.get('Y') > 0 && currPlayer.drawChip("Y")) {
-            chipBank.put('Y', chipBank.get('Y') - 1);
-            updateCurrChips();
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Return chips to bank after purchasing card.
-     */
-    private void returnChipsToBank(Card card) {
-        // Chips are returned when buying - this is handled in Player.buyCard()
-        // Could track specifically which chips were spent and return them here
-    }
-
-    /**
-     * Convert numeric code to color character.
-     */
-    private char getColorFromCode(int code) {
-        char[] colors = {'R', 'G', 'B', 'W', 'K', 'Y'};
-        if (code >= 0 && code < colors.length) {
-            return colors[code];
-        }
-        return 'R'; // Default
-    }
-
-    /**
-     * Update the currChips set based on chip bank.
-     */
-    private void updateCurrChips() {
-        currChips.clear();
-        for (Map.Entry<Character, Integer> entry : chipBank.entrySet()) {
-            if (entry.getValue() > 0) {
-                currChips.add(String.valueOf(entry.getKey()));
+                // track chip drawn this turn
+                currChips.put(c, currChips.getOrDefault(c, 0) + 1);
+                
+                // check turn-swap conditions
+                int totalDrawn = currChips.size();
+                
+                // condition 2: 3 total tokens drawn
+                if (totalDrawn >= 3) {
+                    shouldSwap = true;
+                }
             }
-        }
-    }
+            
+            if(!chipDrawn) chipDrawn = true;
 
-    /**
-     * Get the current player.
-     */
-    private Player getCurrentPlayer() {
-        return currPlayer;
-    }
+            if (shouldSwap) {
+                    // System.out.println("Turn ends after drawing chips");
+                    nextTurn();
+                }
+                
+            saveGameState();
 
-    /**
-     * Advance to the next player.
-     */
-    private void nextPlayer() {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        currPlayer = players.get(currentPlayerIndex);
-        System.out.println("\n" + currPlayer.getName() + "'s turn");
-    }
+            return ok;
+        } else if (movIndex == 2) { // (move.startsWith("buy:")) {
+            // cannot buy if already took an action (drew chips) this turn
+            if (chipDrawn) {
+                // System.out.println("Cannot buy after drawing chips"); 
+                return false;
+            }
 
-    /**
-     * Check if the game is over.
-     */
-    private boolean gameOver() {
-        for (Player player : players) {
-            if (player.getTotalVP() >= WINNING_SCORE) {
-                return true;
+            String idxStr = move.substring("buy:".length());
+            try {
+                int idx = Integer.parseInt(idxStr);
+                if (idx < 0 || idx >= cards.size()) return false;
+                Card c = cards.get(idx);
+                boolean ok = currPlayer.buyCard(c);
+                if (ok) {
+                    cards.remove(idx);
+                    // condition 3: card was bought, swap turn
+                    nextTurn();
+                    saveGameState();
+                }
+                return ok;
+            } catch (NumberFormatException e) {
+                // System.out.println("Failed to parse buy index: " + idxStr);
+                return false;
             }
         }
         return false;
     }
 
-    /**
-     * Announce the winner.
-     */
-    private void announceWinner() {
-        Player winner = null;
-        int highestVP = -1;
+    public Player getCurrentPlayer() { return currPlayer; }
 
-        for (Player player : players) {
-            if (player.getTotalVP() > highestVP) {
-                highestVP = player.getTotalVP();
-                winner = player;
+    public void nextTurn() {
+        if (players.size() > 0) {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+            currPlayer = players.get(currentPlayerIndex);
+            // reset action and drawn chips tracker for new turn
+            currChips.clear();
+            chipDrawn = false;
+        }
+    }
+
+    public boolean gameOver() {
+        for (Player p : players) if (p.getTotalVP() >= 15) return true;
+        return cards.isEmpty();
+    }
+    // Public helper so UI can check game-over state
+    public boolean isGameOver() {
+        return gameOver();
+    }
+
+    // Determine winner: if a player has >= 15 VP, return them; otherwise return player with max VP (or null if no players)
+    public Player getWinner() {
+        if (players.isEmpty()) return null;
+        for (Player p : players) if (p.getTotalVP() >= 15) return p;
+        Player best = players.get(0);
+        for (Player p : players) {
+            if (p.getTotalVP() > best.getTotalVP()) best = p;
+        }
+        return best;
+    }
+    private String loadCards() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cards.size(); i++) sb.append(i).append(": ").append(cards.get(i)).append("\n");
+        return sb.toString();
+    }
+
+    private void saveGameState() {
+        // serialize current game state to JSON and save
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"player\": {\n");
+        for (int i = 0; i < players.size(); i++) {
+            Player p = players.get(i);
+            json.append("    \"").append(i).append("\": {\n");
+            json.append("      \"totalVP\": ").append(p.getTotalVP()).append(",\n");
+            json.append("      \"chips\": {\n");
+            // use the player's existing chip map
+            Map<Character, Integer> chipCounts = p.getChips();
+            // System.out.println(chipCounts);
+            List<Character> colors = java.util.Arrays.asList('R', 'B', 'G', 'K', 'W');
+            for (int ci = 0; ci < colors.size(); ci++) {
+                char color = colors.get(ci);
+                int count = chipCounts.getOrDefault(color, 0);
+                // System.out.println(count);
+                json.append("        \"").append(color).append("\": ").append(count);
+                if (ci < colors.size() - 1) json.append(",");
+                json.append("\n");
             }
+            json.append("      }\n");
+            json.append("    }");
+            if (i < players.size() - 1) json.append(",");
+            json.append("\n");
         }
-
-        if (winner != null) {
-            System.out.println("\n=== GAME OVER ===");
-            System.out.println("Winner: " + winner.getName() + " with " + winner.getTotalVP() + " points!");
+        json.append("  },\n");
+        json.append("  \"cards\": {\n");
+        for (int i = 0; i < cards.size(); i++) {
+            Card c = cards.get(i);
+            json.append("    \"").append(i).append("\": {\"victoryPoint\": ").append(c.getVictoryPoints()).append(", \"cost\": \"").append(c.getCost()).append("\"}");
+            if (i < cards.size() - 1) json.append(",");
+            json.append("\n");
         }
+        json.append("  },\n");
+        json.append("  \"cardsRemaining\": [");
+        List<Card> cards = getCards();
+        json.append(cards.get(0).id);
+        for(int j = 1; j < cards.size(); j++){
+            json.append(", " + cards.get(j).id);
+        } 
+        json.append( "],\n");
+        json.append("  \"currTurn\": ").append(currentPlayerIndex).append("\n");
+        json.append("}\n");
+        // System.out.println("Saving game state:\n" + json.toString());
+        dataLoader.saveGame(json.toString());
     }
 
-    // Getters
-    public List<Player> getPlayers() {
-        return new ArrayList<>(players);
-    }
-
-    public List<Card> getCards() {
-        return new ArrayList<>(cards);
-    }
-
-    public Player getCurrentPlayerPublic() {
-        return currPlayer;
-    }
-
-    public Set<String> getCurrChips() {
-        return new HashSet<>(currChips);
-    }
-
-    public Map<Character, Integer> getChipBank() {
-        return new HashMap<>(chipBank);
-    }
-
-    public boolean isGameLoaded() {
-        return gameLoaded;
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Players:\n");
+        for (Player p : players) sb.append(p).append("\n");
+        sb.append("Cards:\n");
+        sb.append(loadCards());
+        return sb.toString();
     }
 }

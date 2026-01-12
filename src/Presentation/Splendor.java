@@ -77,7 +77,7 @@ public class Splendor extends JFrame {
             JButton btn = new JButton(name);
             btn.setActionCommand(color);
             btn.addActionListener(e -> {
-                boolean ok = gameBoy.makeMove(0, "draw:" + e.getActionCommand());
+                boolean ok = gameBoy.makeMove(1, e.getActionCommand());
                 log("Draw " + e.getActionCommand() + " -> " + ok);
                 refreshUI();
             });
@@ -137,7 +137,7 @@ public class Splendor extends JFrame {
                     String idxStr = e.getActionCommand();
                     try {
                         int idx = Integer.parseInt(idxStr);
-                        boolean ok = gameBoy.makeMove(0, "buy:" + idx);
+                        boolean ok = gameBoy.makeMove(2, ""+idx);
                         log("Buy card " + idx + " -> " + ok);
                         refreshUI();
                     } catch (NumberFormatException ex) {

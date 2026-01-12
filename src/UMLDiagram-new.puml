@@ -1,63 +1,111 @@
 @startuml
 
-class main{
-+main(args: String[]):void
+class Main{
+  +main(args: String[]):void
 }
 
 package PresentationLayer{
   class Splendor{
-    frame: JFrame
-    gameBoy: GameBoy
-    g: Graphics
+    -frame: JFrame
+    -gameBoy: GameBoy
+    -logArea: JTextArea
+    -cardsPanel: JPanel
+    -statusLabel: JLabel
+    -gameOverDialogShown: boolean
 
+    +Splendor()
+    -initUI(): void
+    -log(s: String): void
+    -refreshUI(): void
     +loadGame(): void
     +playGame(): void
+  }
+
+  class CardView {
+    +card: Card
+    +index: int
+
+    +CardView(c: Card, index: int, buyListener: ActionListener)
+    -initUI(buyListener: ActionListener): void
+    -colorOf(c: char): Color
   }
 }
 
 package DomainLayer{
   class GameBoy{
-    cards: List<Card>
-    players: List<Player>
-    currChips: Set<String>
-    currPlayer: Player
+    -cards: List<Card>
+    -players: List<Player>
+    -currPlayer: Player
+    -currentPlayerIndex: int
+    -currChips: Map<Character, Integer>
+    -chipDrawn: boolean
+    -dataLoader: DataLoader
+
     +getPlayers(): List<Players>
     +getCards(): List<Cards>
+    +newGame(): void
+    -generateRandomCards(): void
     +loadGame(): void
+    -parsePlayers(json: String): void
+    -parseCards(json: String): void
     +makeMove(movIndex: int, move: String): boolean
-    -getCurrentPlayer(): Player
-    -gameOver(): boolean
+    +getCurrentPlayer(): Player
+    +nextTurn(): void
+    +gameOver(): boolean
+    +isGameOver(): boolean
+    +getWinner(): Player
     -loadCards(): String
+    -saveGameState(): void
+    +toString(): String
   }
 
   class Card{
-    victoryPoints: int
-    cost: String
-    toString(): String
+    +id: int
+    -victoryPoints: int
+    -cost: String
+
+    +Card(victoryPoints: int, cost: String, id: int)
+    +getVictoryPoints(): int
+    +getCost(): String
+    +getCostMap(): Map<Character, Integer>
+    +toString(): String
   }
 
   class Player{
-    totalVP: int
-    chips: Map<Character, Integer>
-    name: String
-    drawChip(color: String): boolean
-    buyCard(card: Card): boolean
-    toString(): String
+    -totalVP: int
+    -chips: Map<Character, Integer>
+    -name: String
+
+    +Player(name: String, initVP: int, initialChips: Map<Character, Integer>)
+    +Player(name: String)
+    +getName(): String
+    +getTotalVP(): int
+    +getChips(): Map<Character, Integer>
+    +drawChip(color: String): boolean
+    +buyCard(card: Card): boolean
+    +resetChips(): void
+    +resetVP(): void
+    +toString(): String
   }
 }
 package DataLayer{
   class DataLoader{
-   loadprevGame(): String
+    -dbPath: Path
+    +DataLoader()
+    +loadprevGame(): String
+    +saveGame(json: String): void
   }
 }
 
-main --> Splendor
+Main --> Splendor
 
 Splendor --> GameBoy
 
 Splendor ..> Card
 
 Splendor ..> Player
+
+Splendor .l.> CardView
 
 GameBoy --> DataLoader
 

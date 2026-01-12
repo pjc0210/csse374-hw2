@@ -23,7 +23,7 @@ public class GameBoy {
 
     public List<Player> getPlayers() { return players; }
     public List<Card> getCards() { return cards; }
-    public int getCurrentPlayerIndex() { return currentPlayerIndex; }
+//    public int getCurrentPlayerIndex() { return currentPlayerIndex; }
 
     public void newGame() {
         // reset players' chips and VP, reset current turn, generate random cards
@@ -206,7 +206,7 @@ public class GameBoy {
     }
 
     /**
-     * perform a move. move strings supported: "draw:R" or "buy:idx" (idx = index in cards list)
+     * perform a move. move strings supported: "R" (draw) or "idx" (buy) (idx = index in cards list)
      * Drawing: can draw up to 3 total tokens (different colors) OR 2 of same color, then turn swaps.
      * Buying: ends the turn immediately.
      * Player cannot both draw and buy in same turn.
@@ -215,7 +215,7 @@ public class GameBoy {
         if (currPlayer == null) return false;
         if (move == null) return false;
         move = move.trim();
-        if (move.startsWith("draw:")) {
+        if (movIndex == 1) { //(move.startsWith("draw:")) {
             // cannot draw if already bought this turn
             
             String color = move.substring("draw:".length());
@@ -259,7 +259,7 @@ public class GameBoy {
             saveGameState();
 
             return ok;
-        } else if (move.startsWith("buy:")) {
+        } else if (movIndex == 2) { // (move.startsWith("buy:")) {
             // cannot buy if already took an action (drew chips) this turn
             if (chipDrawn) {
                 // System.out.println("Cannot buy after drawing chips"); 

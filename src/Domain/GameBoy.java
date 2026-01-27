@@ -217,8 +217,8 @@ public class GameBoy {
         move = move.trim();
         if (movIndex == 1) { //(move.startsWith("draw:")) {
             // cannot draw if already bought this turn
-            
-            String color = move.substring("draw:".length());
+            System.out.print(move);
+            String color = move;
             char c = Character.toUpperCase(color.charAt(0));
             
             // if we already have 2 different colors, cannot draw any more
@@ -266,7 +266,7 @@ public class GameBoy {
                 return false;
             }
 
-            String idxStr = move.substring("buy:".length());
+            String idxStr = move;
             try {
                 int idx = Integer.parseInt(idxStr);
                 if (idx < 0 || idx >= cards.size()) return false;
